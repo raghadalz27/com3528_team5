@@ -14,8 +14,13 @@ def sonar_printer():
     # Create a subscriber with topic name '/sonar_data' and message type Range
     rospy.Subscriber('/miro/sensors/sonar', Range, range_callback)
     
+    # Set the loop rate to 1 Hz
+    rate = rospy.Rate(1)
+    
     # Spin until shutdown
-    rospy.spin()
+    while not rospy.is_shutdown():
+        rospy.spinOnce()
+        rate.sleep()
 
 if __name__ == '__main__':
     sonar_printer()
