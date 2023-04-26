@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import rospy
 from sensor_msgs.msg import Range
@@ -12,7 +12,7 @@ def sonar_printer():
     rospy.init_node('sonar_printer', anonymous=True)
     
     # Create a subscriber with topic name '/sonar_data' and message type Range
-    rospy.Subscriber('/sonar_data', Range, range_callback)
+    rospy.Subscriber('/miro/sensors/sonar', Range, range_callback)
     
     # Spin until shutdown
     rospy.spin()
