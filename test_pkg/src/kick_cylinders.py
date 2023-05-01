@@ -115,7 +115,10 @@ class MiRoClient:
         # Extract colour boundaries for masking image
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
-        hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+        if self.COLOUR == 0:
+            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+        else:
+            hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -226,7 +229,7 @@ class MiRoClient:
             image = self.input_camera[index]
             # Run the detect cylinder procedure
             self.cylinder[index] = self.detect_cylinder(image, index)
-            
+
         # If only the right camera sees the cylinder, rotate clockwise
         if not self.cylinder[0] and self.cylinder[1]:
             self.drive(self.SLOW, -self.SLOW)
