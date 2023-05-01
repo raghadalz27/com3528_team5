@@ -18,14 +18,20 @@ try:  # For convenience, import this util separately
 except ImportError:
     from miro2.utils import wheel_speed2cmd_vel  # Python 2
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
 class MiRoClient:
     TICK = 0.02  # This is the update interval for the main control loop in secs
     CAM_FREQ = 1  # Number of ticks before camera gets a new frame, increase in case of network lag
     SLOW = 0.1  # Radial speed when turning on the spot (rad/s)
     FAST = 0.8  # Linear speed when kicking the cylinder (m/s)
     DEBUG = True  # Set to True to enable debug views of the cameras
+<<<<<<< HEAD
     COLOUR = 1 # 0 = BLUE, 1 = RED
+=======
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
     ##NOTE The following option is relevant in MiRoCODE
     NODE_EXISTS = False  # Disables (True) / Enables (False) rospy.init_node
 
@@ -93,7 +99,11 @@ class MiRoClient:
             # Ignore corrupted frames
             pass
 
+<<<<<<< HEAD
     def detect_cylinder(self, frame, index):
+=======
+    def detect_cylinders(self, frame, index):
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
         if frame is None:  # Sanity check
             return
 
@@ -107,6 +117,7 @@ class MiRoClient:
         # Get image in HSV (hue, saturation, value) colour format
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
+<<<<<<< HEAD
         # RGB values of target cylinder
         rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]])]  # e.g. Blue (Note: BGR)
         # Convert RGB values to HSV colour model
@@ -121,6 +132,27 @@ class MiRoClient:
         ##NOTE Both masks are currently blue
         mask = cv2.inRange(im_hsv, hsv_boundries[0], hsv_boundries[1])
         mask_on_image = cv2.bitwise_and(im_hsv, im_hsv, mask=mask)
+=======
+        # RGB values of target cylinders
+        rgb_blue_cylinder = np.uint8([[[255, 0, 0]]])  # e.g. Blue (Note: BGR)
+        rgb_red_cylinder = np.uint8([[[0, 0, 255]]]) 
+        # Convert RGB values to HSV colour model
+        hsv_blue_cylinder = cv2.cvtColor(rgb_blue_cylinder, cv2.COLOR_RGB2HSV)
+        hsv_red_cylinder = cv2.cvtColor(rgb_red_cylinder, cv2.COLOR_RGB2HSV)
+
+        # Extract colour boundaries for masking image
+        # Get the hue value from the numpy array containing target colour
+        target_hues = [hsv_blue_cylinder[0, 0][0], hsv_red_cylinder[0, 0][0]]
+        hsv_blue_boundries = [np.array([target_hues[0] - 20, 70, 70]), np.array([target_hues[0] + 20, 255, 255])]
+        ##NOTE Need to work out red colour boundaries
+        #hsv_red_boundries = [np.array([target_hues[1] - 20, 70, 70]), np.array([target_hues[1] + 20, 255, 255])]
+
+        # Generate the mask based on the desired hue range
+        ##NOTE Both masks are currently blue
+        masks = [cv2.inRange(im_hsv, hsv_blue_boundries[0], hsv_blue_boundries[1]), cv2.inRange(im_hsv, hsv_blue_boundries[0], hsv_blue_boundries[1])]
+        ##NOTE Currently only looks for blue
+        mask_on_image = cv2.bitwise_and(im_hsv, im_hsv, mask=masks[0])
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
 
         # Debug window to show the mask
         if self.DEBUG:
@@ -128,7 +160,11 @@ class MiRoClient:
             cv2.waitKey(1)
 
         # Clean up the image
+<<<<<<< HEAD
         seg = mask # Currently only looks for blue
+=======
+        seg = masks[0] # Currently only looks for blue
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
         seg = cv2.GaussianBlur(seg, (5, 5), 0)
         seg = cv2.erode(seg, None, iterations=2)
         seg = cv2.dilate(seg, None, iterations=2)
@@ -203,7 +239,11 @@ class MiRoClient:
                 continue
             image = self.input_camera[index]
             # Run the detect cylinder procedure
+<<<<<<< HEAD
             self.cylinder[index] = self.detect_cylinder(image, index)
+=======
+            self.cylinder[index] = self.detect_cylinders(image, index)
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
         # If no cylinder has been detected
         if not self.cylinder[0] and not self.cylinder[1]:
             self.drive(self.SLOW, -self.SLOW)
@@ -224,7 +264,11 @@ class MiRoClient:
                 continue
             image = self.input_camera[index]
             # Run the detect cylinder procedure
+<<<<<<< HEAD
             self.cylinder[index] = self.detect_cylinder(image, index)
+=======
+            self.cylinder[index] = self.detect_cylinders(image, index)
+>>>>>>> 6c9ea6879bd50e2d0e6558b2ad77d2ec81b9714f
         # If only the right camera sees the cylinder, rotate clockwise
         if not self.cylinder[0] and self.cylinder[1]:
             self.drive(self.SLOW, -self.SLOW)
