@@ -24,7 +24,7 @@ class MiRoClient:
     SLOW = 0.1  # Radial speed when turning on the spot (rad/s)
     FAST = 0.8  # Linear speed when kicking the cylinder (m/s)
     DEBUG = True  # Set to True to enable debug views of the cameras
-    COLOUR = 1 # 0 = BLUE, 1 = RED
+    COLOUR = 1 # 0 = BLUE, 1 = RED, 2 = GREEN
 
     ##NOTE The following option is relevant in MiRoCODE
     NODE_EXISTS = False  # Disables (True) / Enables (False) rospy.init_node
@@ -35,7 +35,7 @@ class MiRoClient:
         """
         self.kin_joints = JointState()  # Prepare the empty message
         self.kin_joints.name = ["tilt", "lift", "yaw", "pitch"]
-        self.kin_joints.position = [0.0, radians(15.0), 0.0, 0.0]
+        self.kin_joints.position = [0.0, radians(35.0), 0.0, 0.0]
         t = 0
         while not rospy.core.is_shutdown():  # Check ROS is running
             # Publish state to neck servos for 1 sec
@@ -117,8 +117,10 @@ class MiRoClient:
         target_hue = hsv_cylinder[0, 0][0]
         if self.COLOUR == 0:
             hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
-        else:
+        elif self.COLOUR == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
+        else:
+            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -139,8 +141,8 @@ class MiRoClient:
         # Fine-tune parameters
         cylinder_detect_min_dist_between_cens = 40  # Empirical
         canny_high_thresh = 10  # Empirical
-        cylinder_detect_sensitivity = 10  # Lower detects more circles, so it's a trade-off
-        cylinder_detect_min_radius = 5  # Arbitrary, empirical
+        cylinder_detect_sensitivity = 20  # Lower detects more circles, so it's a trade-off
+        cylinder_detect_min_radius = 15  # Arbitrary, empirical
         cylinder_detect_max_radius = 50  # Arbitrary, empirical
          
         ##NOTE Need to change to find cylinder boundaries using hough line transform
