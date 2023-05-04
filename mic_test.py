@@ -38,18 +38,33 @@ class Mic():
         sample_rate = 20000
         frequencies = np.linspace(0, sample_rate, len(self.buffer))
 
-        desired_frequency = 400
+        desired_frequency_one = 1000
+        desired_frequency_two = 1300
+        desired_frequency_three = 1600
+        desired_frequency_four = 2000
 
+        index_one = np.abs(frequencies - desired_frequency_one).argmin()
+        index_two = np.abs(frequencies - desired_frequency_two).argmin()
+        index_three = np.abs(frequencies - desired_frequency_three).argmin()
+        index_four = np.abs(frequencies - desired_frequency_four).argmin()
 
-        index = np.abs(frequencies - desired_frequency).argmin()
+        amplitude_one=np.abs(fft_buffer[index_one])
+        amplitude_two=np.abs(fft_buffer[index_two])
+        amplitude_three=np.abs(fft_buffer[index_three])
+        amplitude_four=np.abs(fft_buffer[index_four])
 
-        amplitude=np.abs(fft_buffer[index])
+        threshold = 2000000
+        if amplitude_one > threshold:
+            print("Signal one detected")
 
-        threshold = 750000
-        if amplitude > threshold:
-            print("Sound frequency detected!")
-        else:
-            print("Sound frequency not detected.")
+        if amplitude_two > threshold:
+            print("Signal two detected")
+
+        if amplitude_three > threshold:
+            print("Signal three detected")
+
+        if amplitude_four > threshold:
+            print("Signal four detected")
 
 
     def loop(self):
