@@ -60,11 +60,12 @@ class MiRoClient:
         if not self.NODE_EXISTS:
             rospy.init_node("kbandit", anonymous=True)
 
-         rospy.sleep(2.0)
         # Initialise CV Bridge
         self.image_converter = CvBridge()
         # Individual robot name acts as ROS topic prefix
         topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
+        # Create handle to store images
+        self.input_camera = [None, None]
         # Create two new subscribers to receive camera images with attached callbacks
         self.sub_caml = rospy.Subscriber(
             topic_base_name + "/sensors/caml/compressed",
@@ -88,8 +89,9 @@ class MiRoClient:
         self.pub_kin = rospy.Publisher(
             topic_base_name + "/control/kinematic_joints", JointState, queue_size=0
         )
-        # Create handle to store images
-        self.input_camera = [None, None]
+        self.pub_cos = rospy.Publisher(
+            topic_root + "/control/cosmetic_joints", Float32MultiArray, queue_size=0
+        )
         # New frame notification
         self.new_frame = [False, False]
         # Create variable to store a list of cylinder's x, y, and r values for each camera
@@ -101,7 +103,7 @@ class MiRoClient:
         # Bookmark
         self.bookmark = 0
         # Move the head to default pose
-        self.reset_head_pose()
+        
 
         # List of action functions
         ##NOTE Try writing your own action functions and adding them here
@@ -143,6 +145,7 @@ class MiRoClient:
         self.r = 0  # Current action index
         self.alpha = 0.7  # learning rate
         self.discount = 25  # discount factor (anti-damping)
+        self.reset_head_pose()
 
         # Give it a sec to make sure everything is initialised
         rospy.sleep(1.0)
