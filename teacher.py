@@ -53,7 +53,7 @@ class Teacher():
         # Bookmark
         self.bookmark = 0
 
-    def callback_mics(self):
+    def callback_mics(self, tcp): 
         pass
 
     def callback_caml(self, ros_image):  # Left camera
