@@ -108,7 +108,7 @@ class MiRoClient:
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         # RGB values of target cylinder
-        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]])]  # e.g. Blue (Note: BGR)
+        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # e.g. Blue (Note: BGR)
         # Convert RGB values to HSV colour model
         hsv_cylinder = cv2.cvtColor(rgb_cylinder[self.COLOUR], cv2.COLOR_RGB2HSV)        
 
