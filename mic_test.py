@@ -5,7 +5,7 @@ import miro2 as miro
 from std_msgs.msg import Int16MultiArray
 from node_detect_audio_engine import DetectAudioEngine
 from collections import deque
-from scipy.fft import fft
+from scipy import fft
 
 ## data.data = audio signal
 
@@ -38,12 +38,14 @@ class Mic():
         sample_rate = 20000
         frequencies = np.linspace(0, sample_rate, len(self.buffer))
 
-        desired_frequency = 2000
+        desired_frequency = 400
+
+
         index = np.abs(frequencies - desired_frequency).argmin()
 
         amplitude=np.abs(fft_buffer[index])
 
-        threshold = 100000
+        threshold = 750000
         if amplitude > threshold:
             print("Sound frequency detected!")
         else:
