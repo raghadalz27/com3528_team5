@@ -23,14 +23,19 @@ import rospy  # ROS Python interface
 from std_msgs.msg import (
     Float32MultiArray,
     UInt32MultiArray,
+    Int16MultiArray,
     UInt16,
 )  # Used in callbacks
 from sensor_msgs.msg import CompressedImage  # ROS CompressedImage message
 from sensor_msgs.msg import JointState  # ROS joints state message
 from cv_bridge import CvBridge, CvBridgeError  # ROS -> OpenCV converter
 from geometry_msgs.msg import TwistStamped  # ROS cmd_vel (velocity control) message
-
 import miro2 as miro  # MiRo Developer Kit library
+from node_detect_audio_engine import DetectAudioEngine
+from collections import deque
+from scipy.fft import fft
+
+
 try:  # For convenience, import this util separately
     from miro2.lib import wheel_speed2cmd_vel  # Python 3
 except ImportError:
@@ -46,6 +51,11 @@ class MiRoClient:
     VERBOSE = True  # Whether to print out values of Q and N after each iteration
     ##NOTE The following option is relevant in MiRoCODE
     NODE_EXISTS = False  # Disables (True) / Enables (False) rospy.init_node
+    CAM_FREQ = 1
+    SLOW = 0.1
+    FAST = 0.8
+    DEBUG = True
+    SIGNAL = 0
 
     def __init__(self):
         """
@@ -92,6 +102,14 @@ class MiRoClient:
         self.pub_cos = rospy.Publisher(
             topic_root + "/control/cosmetic_joints", Float32MultiArray, queue_size=0
         )
+        topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
+       
+        # subscribers
+        self.sub_mics = rospy.Subscriber(topic_base_name + "/sensors/mics",
+            Int16MultiArray, self.callback_mics, queue_size=1, tcp_nodelay=True)
+        
+        self.buffer_size = 5000
+        self.buffer = deque(maxlen=self.buffer_size)
         # New frame notification
         self.new_frame = [False, False]
         # Create variable to store a list of cylinder's x, y, and r values for each camera
@@ -108,7 +126,9 @@ class MiRoClient:
         # List of action functions
         ##NOTE Try writing your own action functions and adding them here
         self.actions = [
-            self.earWiggle,
+            # self.goAfterBlue,
+            # self.goAfterGreen,
+            self.fakeJob,
         ]
 
         # Initialise objects for data storage and publishing
@@ -150,12 +170,56 @@ class MiRoClient:
         # Give it a sec to make sure everything is initialised
         rospy.sleep(1.0)
 
-    def earWiggle(self, t0):
+    def callback_mics(self, data):
+        
+        # print(np.shape(data.data))
+        # print(data.data[:500])
+
+        ## extend the buffer with left ear
+        self.buffer.extend(data.data[:500])
+
+        #print(self.buffer[0])
+        #print(len(self.buffer))
+
+        fft_buffer = fft(self.buffer)
+
+        sample_rate = 20000
+        frequencies = np.linspace(0, sample_rate, len(self.buffer))
+
+        desired_frequency_one = 1000
+        desired_frequency_two = 1300
+        desired_frequency_three = 1600
+        desired_frequency_four = 2000
+
+        index_one = np.abs(frequencies - desired_frequency_one).argmin()
+        index_two = np.abs(frequencies - desired_frequency_two).argmin()
+        index_three = np.abs(frequencies - desired_frequency_three).argmin()
+        index_four = np.abs(frequencies - desired_frequency_four).argmin()
+
+        amplitude_one=np.abs(fft_buffer[index_one])
+        amplitude_two=np.abs(fft_buffer[index_two])
+        amplitude_three=np.abs(fft_buffer[index_three])
+        amplitude_four=np.abs(fft_buffer[index_four])
+
+        threshold = 2000000
+        if amplitude_one > threshold:
+            self.SIGNAL = 1
+
+        if amplitude_two > threshold:
+            self.SIGNAL = 2
+
+        if amplitude_three > threshold:
+            self.SIGNAL = 3
+
+        if amplitude_four > threshold:
+            self.SIGNAL = 4
+
+    def goAfterBlue(self, t0):
         print("MiRo Going after blue cylinder")
         self.counter = 0
         # This switch loops through MiRo behaviours:
         # Find cylinder, lock on to the cylinder and kick cylinder
-        self.status_code = 0
+        self.status_code = 1
         while rospy.Time.now() < t0 + self.ACTION_DURATION:
             if self.status_code == 1:
                 # Every once in a while, look for cylinder
@@ -164,7 +228,7 @@ class MiRoClient:
 
             # Step 2. Orient towards it
             elif self.status_code == 2:
-                self.lock_onto_cylinder()
+                self.lock_onto_cylinder(colour = 0)
 
             # Step 3. Kick!
             elif self.status_code == 3:
@@ -172,14 +236,48 @@ class MiRoClient:
 
             # Fall back
             else:
-                self.status_code = 1
+                self.status_code = 0
 
             # Yield
             self.counter += 1
             rospy.sleep(self.TICK)
-        self.cos_joints.data[self.left_ear] = 0.0
-        self.cos_joints.data[self.right_ear] = 0.0
-        self.pub_cos.publish(self.cos_joints)
+    
+    def fakeJob(self, t0):
+        print("faking job")
+        self.counter = 0
+        # This switch loops through MiRo behaviours:
+        # Find cylinder, lock on to the cylinder and kick cylinder
+        while rospy.Time.now() < t0 + self.ACTION_DURATION:
+            self.counter += 1
+            rospy.sleep(self.TICK)
+
+    def goAfterGreen(self, t0):
+        print("MiRo Going after Green cylinder")
+        self.counter = 0
+        # This switch loops through MiRo behaviours:
+        # Find cylinder, lock on to the cylinder and kick cylinder
+        self.status_code = 1
+        while rospy.Time.now() < t0 + self.ACTION_DURATION:
+            if self.status_code == 1:
+                # Every once in a while, look for cylinder
+                if self.counter % self.CAM_FREQ == 0:
+                    self.look_for_cylinder(colour=2)
+
+            # Step 2. Orient towards it
+            elif self.status_code == 2:
+                self.lock_onto_cylinder(colour= 2)
+
+            # Step 3. Kick!
+            elif self.status_code == 3:
+                self.kick()
+
+            # Fall back
+            else:
+                self.status_code = 0
+
+            # Yield
+            self.counter += 1
+            rospy.sleep(self.TICK)
 
     def touchHeadListener(self, data):
         """
@@ -281,7 +379,7 @@ class MiRoClient:
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         # RGB values of target cylinder
-        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]])]  # e.g. Blue (Note: BGR)
+        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # e.g. Blue (Note: BGR)
         # Convert RGB values to HSV colour model
         hsv_cylinder = cv2.cvtColor(rgb_cylinder[colour], cv2.COLOR_RGB2HSV)        
 
@@ -314,8 +412,8 @@ class MiRoClient:
         # Fine-tune parameters
         cylinder_detect_min_dist_between_cens = 40  # Empirical
         canny_high_thresh = 10  # Empirical
-        cylinder_detect_sensitivity = 20  # Lower detects more circles, so it's a trade-off
-        cylinder_detect_min_radius = 15  # Arbitrary, empirical
+        cylinder_detect_sensitivity = 10  # Lower detects more circles, so it's a trade-off
+        cylinder_detect_min_radius = 5  # Arbitrary, empirical
         cylinder_detect_max_radius = 50  # Arbitrary, empirical
          
         ##NOTE Need to change to find cylinder boundaries using hough line transform
@@ -367,7 +465,7 @@ class MiRoClient:
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
 
-    def look_for_cylinder(self):
+    def look_for_cylinder(self, colour):
         """
         [1 of 3] Rotate MiRo if it doesn't see a cylinder in its current
         position, until it sees one.
@@ -381,7 +479,7 @@ class MiRoClient:
                 continue
             image = self.input_camera[index]
             # Run the detect cylinder procedure
-            self.cylinder[index] = self.detect_cylinder(image, index)
+            self.cylinder[index] = self.detect_cylinder(image, index, colour)
 
         # If no cylinder has been detected
         if not self.cylinder[0] and not self.cylinder[1]:
@@ -390,7 +488,7 @@ class MiRoClient:
             self.status_code = 2  # Switch to the second action
             self.just_switched = True
 
-    def lock_onto_cylinder(self, error=25):
+    def lock_onto_cylinder(self, colour, error=25):
         """
         [2 of 3] Once a cylinder has been detected, turn MiRo to face it
         """
@@ -403,7 +501,7 @@ class MiRoClient:
                 continue
             image = self.input_camera[index]
             # Run the detect cylinder procedure
-            self.cylinder[index] = self.detect_cylinder(image, index)
+            self.cylinder[index] = self.detect_cylinder(image, index, colour)
 
         # If only the right camera sees the cylinder, rotate clockwise
         if not self.cylinder[0] and self.cylinder[1]:
@@ -471,11 +569,16 @@ class MiRoClient:
             if self.VERBOSE:
                 print("Action finished, updating Q table")
 
-            reward_strength = self.reward + self.punishment
-            if reward_strength > 2.0:
+            start_of_break = rospy.Time.now()
+            print("Starting Break")
+            while rospy.Time.now() < start_of_break + self.ACTION_DURATION :
+                rospy.sleep(self.TICK)
+
+            #reward_strength = self.reward + self.punishment
+            if self.SIGNAL == 1:
                 final_reward = 1.0
                 print("This behaviour has been reinforced!")
-            elif reward_strength < -2.0:
+            elif self.SIGNAL == 2:
                 final_reward = -1.0
                 print("This behaviour has been inhibited!")
             else:
@@ -486,6 +589,9 @@ class MiRoClient:
             if self.VERBOSE:
                 print("Q scores are: {}".format(self.Q))
                 print("N values are: {}".format(self.N))
+            self.SIGNAL = 0
+            
+            
 
 
 # This is run when the script is called directly
