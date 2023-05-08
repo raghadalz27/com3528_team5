@@ -42,7 +42,7 @@ class MiRoClient:
 
     # Script settings below
     TICK = 0.02  # Main loop frequency (in secs, default is 50Hz)
-    ACTION_DURATION = rospy.Duration(3.0)  # seconds
+    ACTION_DURATION = rospy.Duration(10.0)  # seconds
     VERBOSE = True  # Whether to print out values of Q and N after each iteration
     ##NOTE The following option is relevant in MiRoCODE
     NODE_EXISTS = False  # Disables (True) / Enables (False) rospy.init_node
@@ -151,16 +151,31 @@ class MiRoClient:
         rospy.sleep(1.0)
 
     def earWiggle(self, t0):
-        print("MiRo wiggling ears")
-        A = 1.0
-        w = 2 * np.pi * 0.2
-        f = lambda t: A * np.cos(w * t)
-        i = 0
+        print("MiRo Going after blue cylinder")
+        self.counter = 0
+        # This switch loops through MiRo behaviours:
+        # Find cylinder, lock on to the cylinder and kick cylinder
+        self.status_code = 0
         while rospy.Time.now() < t0 + self.ACTION_DURATION:
-            self.cos_joints.data[self.left_ear] = f(i)
-            self.cos_joints.data[self.right_ear] = f(i)
-            self.pub_cos.publish(self.cos_joints)
-            i += self.TICK
+            if self.status_code == 1:
+                # Every once in a while, look for cylinder
+                if self.counter % self.CAM_FREQ == 0:
+                    self.look_for_cylinder(colour=0)
+
+            # Step 2. Orient towards it
+            elif self.status_code == 2:
+                self.lock_onto_cylinder()
+
+            # Step 3. Kick!
+            elif self.status_code == 3:
+                self.kick()
+
+            # Fall back
+            else:
+                self.status_code = 1
+
+            # Yield
+            self.counter += 1
             rospy.sleep(self.TICK)
         self.cos_joints.data[self.left_ear] = 0.0
         self.cos_joints.data[self.right_ear] = 0.0
@@ -251,7 +266,7 @@ class MiRoClient:
             # Ignore corrupted frames
             pass
 
-    def detect_cylinder(self, frame, index):
+    def detect_cylinder(self, frame, index, colour):
         if frame is None:  # Sanity check
             return
 
@@ -268,14 +283,14 @@ class MiRoClient:
         # RGB values of target cylinder
         rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]])]  # e.g. Blue (Note: BGR)
         # Convert RGB values to HSV colour model
-        hsv_cylinder = cv2.cvtColor(rgb_cylinder[self.COLOUR], cv2.COLOR_RGB2HSV)        
+        hsv_cylinder = cv2.cvtColor(rgb_cylinder[colour], cv2.COLOR_RGB2HSV)        
 
         # Extract colour boundaries for masking image
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
-        if self.COLOUR == 0:
+        if colour == 0:
             hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
-        elif self.COLOUR == 1:
+        elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
             hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
