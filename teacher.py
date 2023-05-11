@@ -223,8 +223,8 @@ class Teacher():
             self.frameMissingCount = 0
             while self.frameMissingCount<4:
                 #self.beep_pub(self.messages[self.instruction])
-                self.greenSeen = detectGreen()
-                self.blueSeen = detectBlue()
+                self.greenSeen = self.detectGreen()
+                self.blueSeen = self.detectBlue()
                 if not (self.greenSeen == True and self.blueSeen == True) :
                     self.frameMissingCount = self.frameMissingCount + 1
             #identify which cylinder is missing
