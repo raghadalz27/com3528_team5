@@ -214,7 +214,7 @@ class Teacher():
             #say instruction until cylinder is moved
             self.frameMissingCount = 0
             while self.frameMissingCount<4:
-                main.beep_pub(self.messages[self.instruction])
+                self.beep_pub(self.messages[self.instruction])
                 self.greenSeen = detectGreen()
                 self.blueSeen = detectBlue()
                 if not (self.greenSeen == True and self.blueSeen == True) :
@@ -242,7 +242,7 @@ class Teacher():
             start_of_results = rospy.Time.now()
             print("Starting results")
             while rospy.Time.now() < start_of_results + rospy.Duration(5.0):
-                main.beep_pub(self.resultMessage)
+                self.beep_pub(self.resultMessage)
                 rospy.sleep(self.TICK)
                 
             self.instruction = 0
