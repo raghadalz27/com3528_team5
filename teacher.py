@@ -67,6 +67,7 @@ class Teacher():
         self.greenSeen = True
         self.blueSeen = True
         self.frameMissingCount = 0
+        self.DEBUG = True
 
     def callback_mics(self, tcp): 
         pass
@@ -99,7 +100,7 @@ class Teacher():
             # Ignore corrupted frames
             pass
 
-    def detect_cylinder(self, frame, index):
+    def detect_cylinder(self, frame, index, colour):
         if frame is None:  # Sanity check
             return
 
@@ -114,17 +115,19 @@ class Teacher():
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         # RGB values of target cylinder
-        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]])]  # e.g. Blue (Note: BGR)
+        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # e.g. Blue (Note: BGR)
         # Convert RGB values to HSV colour model
-        hsv_cylinder = cv2.cvtColor(rgb_cylinder[self.COLOUR], cv2.COLOR_RGB2HSV)        
+        hsv_cylinder = cv2.cvtColor(rgb_cylinder[colour], cv2.COLOR_RGB2HSV)        
 
         # Extract colour boundaries for masking image
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
-        if self.COLOUR == 0:
+        if colour == 0:
             hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
-        else:
+        elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
+        else:
+            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -199,12 +202,17 @@ class Teacher():
         return [max_circle[0], max_circle[1], max_circle[2]]
     
     def detectBlue():
-        return True
+        if (detect_cylinder(colour=0)!= NULL):
+            return True
+        else:
+            return False
     def detectGreen():
-        return True
-
-    
-    
+        if (detect_cylinder(colour=2)!= NULL):
+            return True
+        else:
+            return False
+        
+        
     def loop(self):
         print("Starting the loop")
         while not rospy.core.is_shutdown():
@@ -214,7 +222,7 @@ class Teacher():
             #say instruction until cylinder is moved
             self.frameMissingCount = 0
             while self.frameMissingCount<4:
-                self.beep_pub(self.messages[self.instruction])
+                #self.beep_pub(self.messages[self.instruction])
                 self.greenSeen = detectGreen()
                 self.blueSeen = detectBlue()
                 if not (self.greenSeen == True and self.blueSeen == True) :
@@ -242,7 +250,7 @@ class Teacher():
             start_of_results = rospy.Time.now()
             print("Starting results")
             while rospy.Time.now() < start_of_results + rospy.Duration(5.0):
-                self.beep_pub(self.resultMessage)
+                #self.beep_pub(self.resultMessage)
                 rospy.sleep(self.TICK)
                 
             self.instruction = 0
