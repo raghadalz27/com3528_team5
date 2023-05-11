@@ -66,6 +66,7 @@ class Teacher():
         self.messages = [message1,message2,message3,message4]
         self.greenSeen = True
         self.blueSeen = True
+        self.frameMissingCount = 0
 
     def callback_mics(self, tcp): 
         pass
@@ -206,8 +207,11 @@ class Teacher():
             self.instruction = np.random.randint(0, 2)
             print("Instruction: " + str(self.instruction))
             #say instruction until cylinder is moved
-            while self.greenSeen == True and self.blueSeen == True:
+            self.frameMissingCount = 0
+            while self.frameMissingCount<4:
                 main.beep_pub(self.messages[self.instruction])
+                if not (self.greenSeen == True and self.blueSeen == True) :
+                    self.frameMissingCount = self.frameMissingCount + 1
             #identify which cylinder is missing
             if(self.blueSeen == False):
                 self.missing = 1
