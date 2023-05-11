@@ -8,6 +8,8 @@ from cv_bridge import CvBridge, CvBridgeError  # ROS -> OpenCV converter
 from sensor_msgs.msg import CompressedImage  # ROS CompressedImage message
 
 class Teacher():
+    TICK = 0.02
+    CAM_FREQ = 1
     def __init__(self):
 
         # which miro
