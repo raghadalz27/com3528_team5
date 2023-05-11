@@ -57,14 +57,15 @@ class Teacher():
         self.instruction = 0
         self.missing = 0
         self.resultMessage = 0
+        self.SIGNALTIME = 2
         message1 = UInt16MultiArray()
-        message1.data = [1000,255,1]
+        message1.data = [1000,255,self.SIGNALTIME]
         message2 = UInt16MultiArray()
-        message2.data = [1300,255,1]
+        message2.data = [1300,255,self.SIGNALTIME]
         message3 = UInt16MultiArray()
-        message3.data = [1600,255,1]
+        message3.data = [1600,255,self.SIGNALTIME]
         message4 = UInt16MultiArray()
-        message4.data = [2000,255,1]
+        message4.data = [2000,255,self.SIGNALTIME]
         self.messages = [message1,message2,message3,message4]
         self.greenSeen = True
         self.blueSeen = True
@@ -93,11 +94,13 @@ class Teacher():
             # Convert from OpenCV's default BGR to RGB
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # Store image as class attribute for further use
+            image = image[170:190,1:640]
             self.input_camera[index] = image
             # Get image dimensions
             self.frame_height, self.frame_width, channels = image.shape
-            self.x_centre = self.frame_width / 2.0
-            self.y_centre = self.frame_height / 2.0
+            self.x_centre = self.frame_width / 2
+            self.y_centre = self.frame_height / 2
+            # Crop image
             # Raise the flag: A new frame is available for processing
             self.new_frame[index] = True
         except CvBridgeError as e:
@@ -127,11 +130,11 @@ class Teacher():
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if colour == 0:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 150, 70]), np.array([target_hue + 20, 255, 255])]
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 230, 230]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -153,7 +156,7 @@ class Teacher():
         cylinder_detect_min_dist_between_cens = 40  # Empirical
         canny_high_thresh = 10  # Empirical
         cylinder_detect_sensitivity = 10  # Lower detects more circles, so it's a trade-off
-        cylinder_detect_min_radius = 5  # Arbitrary, empirical
+        cylinder_detect_min_radius = 1 # Arbitrary, empirical
         cylinder_detect_max_radius = 50  # Arbitrary, empirical
          
         ##NOTE Need to change to find cylinder boundaries using hough line transform
@@ -212,7 +215,7 @@ class Teacher():
                 image = self.input_camera[index]
                 # Run the detect cylinder procedure
                 self.cylinder[index] = self.detect_cylinder(image, index, colour)
-
+            #print(self.cylinder)
             # If no cylinder has been detected
             if not self.cylinder[0] and not self.cylinder[1]:
                 return False
@@ -238,23 +241,31 @@ class Teacher():
             print("Instruction: " + str(self.instruction))
             #say instruction until cylinder is moved
             self.frameMissingCount = 0
-            while self.frameMissingCount<4:
-                #self.beep_pub(self.messages[self.instruction])
-                self.greenSeen = self.look_for_cylinder(0)
-                self.blueSeen = self.look_for_cylinder(2)
-                if not (self.greenSeen == True and self.blueSeen == True) :
+            while self.frameMissingCount<10:
+                if not self.new_frame[0]:
+                    rospy.sleep(self.TICK)
+                    continue
+                #self.beep_pub.publish(self.messages[self.instruction])
+                self.greenSeen = self.look_for_cylinder(2)
+                rospy.sleep(self.TICK)
+                self.blueSeen = self.look_for_cylinder(0)
+                print(self.blueSeen)
+                if not (self.greenSeen and self.blueSeen) :
                     self.frameMissingCount = self.frameMissingCount + 1
+                else:
+                    self.frameMissingCount = 0
+                rospy.sleep(self.TICK)
             #identify which cylinder is missing
-            if(self.blueSeen == False):
+            if not (self.greenSeen):
                 self.missing = 1
-                print("blue missing")
+                print("green missing")
             else:
                 self.missing = 2
-                print("green missing")
+                print("blue missing")
             #break for student to stop
             start_of_break = rospy.Time.now()
             print("Starting Break")
-            while rospy.Time.now() < start_of_break + rospy.Duration(3.0):
+            while rospy.Time.now() < start_of_break + rospy.Duration(5.0):
                 rospy.sleep(self.TICK)
             #decide whether to reward or punish (results)
             if(self.instruction == self.missing):
@@ -267,7 +278,7 @@ class Teacher():
             start_of_results = rospy.Time.now()
             print("Starting results")
             while rospy.Time.now() < start_of_results + rospy.Duration(5.0):
-                #self.beep_pub(self.resultMessage)
+                #self.beep_pub.publish(self.resultMessage)
                 rospy.sleep(self.TICK)
                 
             self.instruction = 0
@@ -275,6 +286,7 @@ class Teacher():
             self.resultMessage = 0
             self.greenSeen = True
             self.blueSeen = True
+            self.cylinder = [None, None]
             print("----------------------------------")
             
                 
