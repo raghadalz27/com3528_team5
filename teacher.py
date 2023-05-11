@@ -70,6 +70,8 @@ class Teacher():
         self.blueSeen = True
         self.frameMissingCount = 0
         self.DEBUG = True
+        
+        rospy.sleep(1.0)
 
     def callback_mics(self, tcp): 
         pass
