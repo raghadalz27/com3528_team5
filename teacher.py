@@ -197,6 +197,11 @@ class Teacher():
 
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
+    
+    def detectBlue():
+        return True
+    def detectGreen():
+        return True
 
     
     
@@ -210,6 +215,8 @@ class Teacher():
             self.frameMissingCount = 0
             while self.frameMissingCount<4:
                 main.beep_pub(self.messages[self.instruction])
+                self.greenSeen = detectGreen()
+                self.blueSeen = detectBlue()
                 if not (self.greenSeen == True and self.blueSeen == True) :
                     self.frameMissingCount = self.frameMissingCount + 1
             #identify which cylinder is missing
@@ -241,6 +248,8 @@ class Teacher():
             self.instruction = 0
             self.missing = 0
             self.resultMessage = 0
+            self.greenSeen = True
+            self.blueSeen = True
             print("----------------------------------")
             
                 
