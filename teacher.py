@@ -201,18 +201,33 @@ class Teacher():
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
     
-    def detectBlue(self):
-        if (self.detect_cylinder(colour=0)!= NULL):
-            return True
-        else:
-            return False
-    def detectGreen(self):
-        if (self.detect_cylinder(colour=2)!= NULL):
-            return True
-        else:
-            return False
+#     def detectBlue(self):
+#         if (self.detect_cylinder(colour=0)!= NULL):
+#             return True
+#         else:
+#             return False
+#     def detectGreen(self):
+#         if (self.detect_cylinder(colour=2)!= NULL):
+#             return True
+#         else:
+#             return False
         
-        
+     def look_for_cylinder(self, colour):
+
+        for index in range(2):  # For each camera (0 = left, 1 = right)
+            # Skip if there's no new image, in case the network is choking
+            if not self.new_frame[index]:
+                continue
+            image = self.input_camera[index]
+            # Run the detect cylinder procedure
+            self.cylinder[index] = self.detect_cylinder(image, index, colour)
+
+        # If no cylinder has been detected
+        if not self.cylinder[0] and not self.cylinder[1]:
+            return False
+        else:
+            return True
+    
     def loop(self):
         print("Starting the loop")
         while not rospy.core.is_shutdown():
@@ -223,8 +238,8 @@ class Teacher():
             self.frameMissingCount = 0
             while self.frameMissingCount<4:
                 #self.beep_pub(self.messages[self.instruction])
-                self.greenSeen = self.detectGreen()
-                self.blueSeen = self.detectBlue()
+                self.greenSeen = self.look_for_cylinder(0)
+                self.blueSeen = self.look_for_cylinder(2)
                 if not (self.greenSeen == True and self.blueSeen == True) :
                     self.frameMissingCount = self.frameMissingCount + 1
             #identify which cylinder is missing
