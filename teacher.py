@@ -200,20 +200,7 @@ class Teacher():
 
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
-    
-#     def detectBlue(self):
-#         if (self.detect_cylinder(colour=0)!= NULL):
-#             return True
-#         else:
-#             return False
-#     def detectGreen(self):
-#         if (self.detect_cylinder(colour=2)!= NULL):
-#             return True
-#         else:
-#             return False
-        
-         def look_for_cylinder(self, colour):
-
+    def look_for_cylinder(self, colour):
             for index in range(2):  # For each camera (0 = left, 1 = right)
                 # Skip if there's no new image, in case the network is choking
                 if not self.new_frame[index]:
@@ -227,6 +214,17 @@ class Teacher():
                 return False
             else:
                 return True
+    
+#     def detectBlue(self):
+#         if (self.detect_cylinder(colour=0)!= NULL):
+#             return True
+#         else:
+#             return False
+#     def detectGreen(self):
+#         if (self.detect_cylinder(colour=2)!= NULL):
+#             return True
+#         else:
+#             return False
     
     def loop(self):
         print("Starting the loop")
