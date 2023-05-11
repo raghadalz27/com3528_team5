@@ -163,6 +163,7 @@ class MiRoClient:
         self.Q = [[0] * len(self.actions),[0] * len(self.actions)]  # Highest Q value gets to run
         self.N = [[0] * len(self.actions),[0] * len(self.actions)]  # Number of times an action was done
         self.r = 0  # Current action index
+        self.instruction = 0
         
         self.alpha = 0.7  # learning rate
         self.discount = 25  # discount factor (anti-damping)
@@ -553,7 +554,8 @@ class MiRoClient:
         """
         print("Starting the loop")
         while not rospy.core.is_shutdown():
-            if(self.SIGNAL == 3 or self.SIGNAL == 4):
+            if(self.SIGNAL == 1 or self.SIGNAL == 2):
+                self.instruction = self.SIGNAL - 1
                 self.reward = 0
                 self.punishment = 0
                 # Select next action randomly or via Q score with equal probability
@@ -562,11 +564,11 @@ class MiRoClient:
                     self.r = np.random.randint(0, len(self.actions))
                 else:
                     print("Performing action with the highest Q score")
-                    self.r = np.argmax(self.Q[self.SIGNAL])
+                    self.r = np.argmax(self.Q[self.instruction])
 
                 # Run the selected action and update the action counter N accordingly
                 start_time = rospy.Time.now()
-                self.N[self.SIGNAL][self.r] += 1
+                self.N[self.instruction][self.r] += 1
                 self.actions[self.r](start_time)
                 if self.VERBOSE:
                     print("Action finished, updating Q table")
@@ -574,21 +576,21 @@ class MiRoClient:
                 #start_of_break = rospy.Time.now()
                 print("Waiting for Results")
                 #while rospy.Time.now() < start_of_break + self.ACTION_DURATION :
-                while self.SIGNAL != 1 or self.SIGNAL != 2 :
+                while self.SIGNAL != 3 or self.SIGNAL != 4 :
                     rospy.sleep(self.TICK)
 
                 #reward_strength = self.reward + self.punishment
-                if self.SIGNAL == 1:
+                if self.SIGNAL == 3:
                     final_reward = 1.0
                     print("This behaviour has been reinforced!")
-                elif self.SIGNAL == 2:
+                elif self.SIGNAL == 4:
                     final_reward = -1.0
                     print("This behaviour has been inhibited!")
                 else:
                     final_reward = 0.0
 
-                gamma = min(self.N[self.SIGNAL][self.r], self.discount)
-                self.Q[self.SIGNAL][self.r] += self.alpha * (final_reward - self.Q[self.SIGNAL][self.r]) / gamma
+                gamma = min(self.N[self.instruction][self.r], self.discount)
+                self.Q[self.instruction][self.r] += self.alpha * (final_reward - self.Q[self.instruction][self.r]) / gamma
                 if self.VERBOSE:
                     print("Q scores are: {}".format(self.Q))
                     print("N values are: {}".format(self.N))
