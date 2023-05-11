@@ -44,7 +44,7 @@ class Teacher():
         # New frame notification
         self.new_frame = [False, False]
         # Create variable to store a list of both cylinder's x, y, and r values for each camera
-        self.cylinder_one = [None, None]
+        self.cylinder = [None, None]
         self.cylinder_two = [None, None]
         # Set the default frame width (gets updated on receiving an image)
         self.frame_width = 640
