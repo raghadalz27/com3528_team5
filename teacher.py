@@ -201,12 +201,12 @@ class Teacher():
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
     
-    def detectBlue():
+    def detectBlue(self):
         if (detect_cylinder(colour=0)!= NULL):
             return True
         else:
             return False
-    def detectGreen():
+    def detectGreen(self):
         if (detect_cylinder(colour=2)!= NULL):
             return True
         else:
