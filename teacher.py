@@ -212,21 +212,21 @@ class Teacher():
 #         else:
 #             return False
         
-     def look_for_cylinder(self, colour):
+         def look_for_cylinder(self, colour):
 
-        for index in range(2):  # For each camera (0 = left, 1 = right)
-            # Skip if there's no new image, in case the network is choking
-            if not self.new_frame[index]:
-                continue
-            image = self.input_camera[index]
-            # Run the detect cylinder procedure
-            self.cylinder[index] = self.detect_cylinder(image, index, colour)
+            for index in range(2):  # For each camera (0 = left, 1 = right)
+                # Skip if there's no new image, in case the network is choking
+                if not self.new_frame[index]:
+                    continue
+                image = self.input_camera[index]
+                # Run the detect cylinder procedure
+                self.cylinder[index] = self.detect_cylinder(image, index, colour)
 
-        # If no cylinder has been detected
-        if not self.cylinder[0] and not self.cylinder[1]:
-            return False
-        else:
-            return True
+            # If no cylinder has been detected
+            if not self.cylinder[0] and not self.cylinder[1]:
+                return False
+            else:
+                return True
     
     def loop(self):
         print("Starting the loop")
