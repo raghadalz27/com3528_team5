@@ -52,6 +52,20 @@ class Teacher():
         self.just_switched = True
         # Bookmark
         self.bookmark = 0
+        self.instruction = 0
+        self.missing = 0
+        self.resultMessage = 0
+        message1 = UInt16MultiArray()
+        message1.data = [1000,255,1]
+        message2 = UInt16MultiArray()
+        message2.data = [1300,255,1]
+        message3 = UInt16MultiArray()
+        message3.data = [1600,255,1]
+        message4 = UInt16MultiArray()
+        message4.data = [2000,255,1]
+        self.messages = [message1,message2,message3,message4]
+        self.greenSeen = True
+        self.blueSeen = True
 
     def callback_mics(self, tcp): 
         pass
@@ -183,6 +197,52 @@ class Teacher():
         # Return a list values [x, y, r] for the largest circle
         return [max_circle[0], max_circle[1], max_circle[2]]
 
+    
+    
+    def loop(self):
+        print("Starting the loop")
+        while not rospy.core.is_shutdown():
+            #pick random instruction
+            self.instruction = np.random.randint(0, 2)
+            print("Instruction: " + str(self.instruction))
+            #say instruction until cylinder is moved
+            while self.greenSeen == True and self.blueSeen == True:
+                main.beep_pub(self.messages[self.instruction])
+            #identify which cylinder is missing
+            if(self.blueSeen == False):
+                self.missing = 1
+                print("blue missing")
+            else:
+                self.missing = 2
+                print("green missing")
+            #break for student to stop
+            start_of_break = rospy.Time.now()
+            print("Starting Break")
+            while rospy.Time.now() < start_of_break + rospy.Duration(3.0):
+                rospy.sleep(self.TICK)
+            #decide whether to reward or punish (results)
+            if(self.instruction == self.missing):
+                self.resultMessage = self.messages[2]
+                print("Correct")
+            else:
+                self.resultMessage = self.messages[3]
+                print("Wrong")
+            #give results
+            start_of_results = rospy.Time.now()
+            print("Starting results")
+            while rospy.Time.now() < start_of_results + rospy.Duration(5.0):
+                main.beep_pub(self.resultMessage)
+                rospy.sleep(self.TICK)
+                
+            self.instruction = 0
+            self.missing = 0
+            self.resultMessage = 0
+            print("----------------------------------")
+            
+                
+        
+        
+        
 if __name__ == "__main__":
 
     rospy.init_node("teacher", anonymous=True)
