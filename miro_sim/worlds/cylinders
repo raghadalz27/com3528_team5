@@ -1871,127 +1871,108 @@
     </spherical_coordinates>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>1.9468 -1.72364 3.76043 0 0.901796 2.63626</pose>
+        <pose>-4.56046 1.47392 2.75364 0 0.58764 -0.31179</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
     <wind/>
-    <state world_name='default'>
-      <sim_time>134 219000000</sim_time>
-      <real_time>68 374277200</real_time>
-      <wall_time>1682943185 480590000</wall_time>
-      <iterations>59071</iterations>
-      <model name='blue_cylinder'>
-        <pose>-0.52083 -0.007134 0.15002 0.000157 0.000368 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>-0.52083 -0.007134 0.15002 0.000157 0.000368 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.004596 0.002031 -0.001672 -0.013536 -0.030636 0</acceleration>
-          <wrench>-4.6e-05 2e-05 -1.7e-05 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='ground_plane'>
-        <pose>0 0 -1 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>0 0 -1 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='miro'>
-        <pose>0.999849 -0.000982 0.000364 -3.2e-05 -0.108204 -0.002321</pose>
-        <scale>1 1 1</scale>
-        <link name='miro_body::body'>
-          <pose>0.999849 -0.000982 0.000364 -3.2e-05 -0.108204 -0.002321</pose>
-          <velocity>0.000239 -0.002302 0.000159 -0.063707 -0.0013 -0.005175</velocity>
-          <acceleration>0.091904 0.549278 0.236346 2.03707 1.29129 -1.63354</acceleration>
-          <wrench>0.144363 0.862806 0.371253 0 -0 0</wrench>
-        </link>
-        <link name='miro_body::wheel_lh'>
-          <pose>0.998751 -0.000989 0.000286 -0.000225 -0.082474 -0.001635</pose>
-          <velocity>0.000331 -0.000108 -0.002529 -0.031581 -0.001297 -0.005116</velocity>
-          <acceleration>0.13189 2.45412 -9.46994 -1.56526 -0.566724 2.78458</acceleration>
-          <wrench>0.017679 0.328953 -1.26936 0 -0 0</wrench>
-        </link>
-        <link name='miro_body::wheel_rh'>
-          <pose>0.997999 -0.000964 0.000244 0.000228 -0.064869 -0.003469</pose>
-          <velocity>0.000419 -6.5e-05 0.002996 -0.030352 -0.004472 -0.0054</velocity>
-          <acceleration>0.225369 2.36424 10.6701 1.33574 -0.523611 -0.713299</acceleration>
-          <wrench>0.030209 0.316905 1.43023 0 -0 0</wrench>
-        </link>
-        <link name='miro_gmbl::gmbl'>
-          <pose>0.95374 -0.000873 0.007777 -1.9e-05 0.476442 -0.002341</pose>
-          <velocity>0.000104 0.001415 8.7e-05 -0.021028 0.00057 -0.001673</velocity>
-          <acceleration>-0.033394 9.31865 0.407165 -1.25689 0.885905 2.79421</acceleration>
-          <wrench>-0.001311 0.365944 0.015989 0 -0 0</wrench>
-        </link>
-        <link name='miro_head::ear_lh'>
-          <pose>0.969699 0.020998 2e-06 0.043846 0.398096 -0.140739</pose>
-          <velocity>0.0015 0.015657 0.000955 0.049664 -0.001392 -0.042085</velocity>
-          <acceleration>2.74189 -0.420712 4.567 -1.07043 0.970312 2.31904</acceleration>
-          <wrench>0.155051 -0.023791 0.258259 0 -0 0</wrench>
-        </link>
-        <link name='miro_head::ear_rh'>
-          <pose>0.969331 -0.022482 0.000102 -0.043055 0.399205 0.133918</pose>
-          <velocity>-0.000333 0.01556 -0.001192 0.049059 -0.001395 -0.042039</velocity>
-          <acceleration>-2.13042 -0.298497 -3.92087 -2.12654 1.11017 2.22974</acceleration>
-          <wrench>-0.120473 -0.01688 -0.221722 0 -0 0</wrench>
-        </link>
-        <link name='miro_head::eyelid_lh'>
-          <pose>1.01392 0.065608 -0.021359 0.288469 0.199762 0.077835</pose>
-          <velocity>0.002753 0.014143 0.003353 0.046787 0.001351 -0.042166</velocity>
-          <acceleration>1.83184 1.81021 3.05661 2.8102 1.09533 -1.17042</acceleration>
-          <wrench>0.030693 0.03033 0.051213 0 -0 0</wrench>
-        </link>
-        <link name='miro_head::eyelid_rh'>
-          <pose>1.04205 -0.098889 -0.022783 -0.406429 0.072634 -0.091272</pose>
-          <velocity>-0.002847 0.012996 -0.004849 0.046654 -0.004123 -0.041985</velocity>
-          <acceleration>-1.45241 1.84354 -2.71218 -0.393643 -0.072498 2.28794</acceleration>
-          <wrench>-0.024335 0.030889 -0.045443 0 -0 0</wrench>
-        </link>
-        <link name='miro_head::head'>
-          <pose>0.954376 -0.000867 0.007456 1.9e-05 0.472899 -0.002342</pose>
-          <velocity>0.000515 0.015757 -0.000126 0.048457 -0.001153 -0.041797</velocity>
-          <acceleration>0.154101 5.39393 0.274571 -3.13346 0.738502 2.55254</acceleration>
-          <wrench>0.040344 1.41213 0.071882 0 -0 0</wrench>
-        </link>
-        <link name='miro_neck::neck'>
-          <pose>0.953742 -0.000875 0.007777 -1.8e-05 0.476436 -0.002317</pose>
-          <velocity>0.000397 -0.003305 -2.4e-05 -0.029279 -0.001826 0.02716</velocity>
-          <acceleration>-0.050342 4.6168 0.467087 1.05065 -1.06077 -3.09768</acceleration>
-          <wrench>-0.003796 0.348097 0.035217 0 -0 0</wrench>
-        </link>
-        <link name='miro_tail::tail'>
-          <pose>0.999724 -0.000969 9.1e-05 -4.1e-05 -0.106404 -0.002232</pose>
-          <velocity>0.000177 -0.002371 4.1e-05 -0.063107 -0.000439 -0.005687</velocity>
-          <acceleration>-0.038731 3.48096 -0.208614 2.44727 1.46009 1.85791</acceleration>
-          <wrench>-0.00219 0.196845 -0.011797 0 -0 0</wrench>
-        </link>
-        <link name='miro_tail::tail_gmbl'>
-          <pose>0.999724 -0.000981 9.1e-05 -3.2e-05 -0.106404 -0.002321</pose>
-          <velocity>0.000172 -0.002392 3.6e-05 -0.063358 -0.000393 -0.005687</velocity>
-          <acceleration>-0.041857 3.47209 -0.208727 1.95938 1.45829 1.8647</acceleration>
-          <wrench>-0.002367 0.196343 -0.011803 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='miro_arena'>
-        <pose>0 0 0 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='main'>
+    <model name='green_cylinder'>
+      <link name='link'>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
           <pose>0 0 0 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <light name='sun'>
-        <pose>0 0 10 0 -0 0</pose>
-      </light>
-    </state>
+        </inertial>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+        <pose>0 0 0 -0 -0 -0</pose>
+        <visual name='visual'>
+          <geometry>
+            <cylinder>
+              <radius>0.08</radius>
+              <length>0.4</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 0 0 1</emissive>
+          </material>
+          <pose>0 0 0 0 -0 0</pose>
+          <transparency>0</transparency>
+          <cast_shadows>1</cast_shadows>
+        </visual>
+        <collision name='collision'>
+          <laser_retro>0</laser_retro>
+          <max_contacts>10</max_contacts>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.3</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <coefficient>1</coefficient>
+                <patch_radius>0</patch_radius>
+                <surface_radius>0</surface_radius>
+                <use_patch_radius>1</use_patch_radius>
+                <ode>
+                  <slip>0</slip>
+                </ode>
+              </torsional>
+            </friction>
+            <bounce>
+              <restitution_coefficient>0</restitution_coefficient>
+              <threshold>1e+06</threshold>
+            </bounce>
+            <contact>
+              <collide_without_contact>0</collide_without_contact>
+              <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
+              <collide_bitmask>1</collide_bitmask>
+              <ode>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+                <max_vel>0.01</max_vel>
+                <min_depth>0</min_depth>
+              </ode>
+              <bullet>
+                <split_impulse>1</split_impulse>
+                <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+              </bullet>
+            </contact>
+          </surface>
+        </collision>
+      </link>
+      <static>0</static>
+      <allow_auto_disable>1</allow_auto_disable>
+      <pose>0.798254 0.217248 0 0 -0 0</pose>
+    </model>
     <model name='blue_cylinder'>
       <link name='link'>
         <inertial>
@@ -2086,7 +2067,132 @@
       </link>
       <static>0</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>-1.50196 -0.517617 0 0 -0 0</pose>
+      <pose>0.788005 -0.249839 0 0 -0 0</pose>
     </model>
+    <state world_name='default'>
+      <sim_time>161 300000000</sim_time>
+      <real_time>164 950232600</real_time>
+      <wall_time>1683807471 610667900</wall_time>
+      <iterations>142397</iterations>
+      <model name='blue_cylinder'>
+        <pose>0.553281 -0.259139 0.149995 -8.2e-05 2.6e-05 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.553281 -0.259139 0.149995 -8.2e-05 2.6e-05 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 -9.8 0 -0 0</acceleration>
+          <wrench>0 0 -0.098 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='green_cylinder'>
+        <pose>0.561531 0.251963 0.150002 2.8e-05 2.3e-05 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.561531 0.251963 0.150002 2.8e-05 2.3e-05 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>5e-06 1.6e-05 -9.79364 -1.7e-05 -1.3e-05 -0</acceleration>
+          <wrench>0 0 -0.097936 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='ground_plane'>
+        <pose>0 0 -1 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0 0 -1 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='miro'>
+        <pose>-0.447443 0.00184 0.000364 2.3e-05 -0.10821 -0.050354</pose>
+        <scale>1 1 1</scale>
+        <link name='miro_body::body'>
+          <pose>-0.447443 0.00184 0.000364 2.3e-05 -0.10821 -0.050354</pose>
+          <velocity>-0.001834 0.002065 0.001033 0.064465 0.039328 -0.017911</velocity>
+          <acceleration>-0.048687 -0.520696 7.23024 1.56471 -1.33705 0.251739</acceleration>
+          <wrench>-0.076478 -0.817909 11.3573 0 -0 0</wrench>
+        </link>
+        <link name='miro_body::wheel_lh'>
+          <pose>-0.448641 0.001889 0.000282 -0.000203 -0.080094 -0.049602</pose>
+          <velocity>-0.001401 6.2e-05 0.003578 0.034623 0.03058 -0.018056</velocity>
+          <acceleration>0.381936 -2.45539 12.4882 0.510884 -0.890051 -1.61166</acceleration>
+          <wrench>0.051195 -0.329123 1.67393 0 -0 0</wrench>
+        </link>
+        <link name='miro_body::wheel_rh'>
+          <pose>-0.449133 0.001936 0.000251 0.000253 -0.068557 -0.051402</pose>
+          <velocity>-0.001836 -0.000253 -0.001857 0.029419 0.041823 -0.017739</velocity>
+          <acceleration>0.149902 -2.78256 -9.55829 -2.34958 -0.128883 2.24926</acceleration>
+          <wrench>0.020093 -0.372977 -1.2812 0 -0 0</wrench>
+        </link>
+        <link name='miro_gmbl::gmbl'>
+          <pose>-0.493489 0.004159 0.007776 4e-06 0.476379 -0.050345</pose>
+          <velocity>0.00175 -0.000814 0.001253 0.015061 -0.009125 -0.024988</velocity>
+          <acceleration>1.1024 -9.88607 3.02894 3.01777 0.608156 -1.62309</acceleration>
+          <wrench>0.043291 -0.388226 0.118946 0 -0 0</wrench>
+        </link>
+        <link name='miro_head::ear_lh'>
+          <pose>-0.476451 0.025229 -1.9e-05 0.043857 0.397776 -0.18876</pose>
+          <velocity>-0.001452 -0.014076 0.001049 -0.050172 0.005848 0.011779</velocity>
+          <acceleration>-1.1027 2.14765 -1.95297 1.21732 -0.651989 1.48215</acceleration>
+          <wrench>-0.062356 0.121447 -0.110438 0 -0 0</wrench>
+        </link>
+        <link name='miro_head::ear_rh'>
+          <pose>-0.479251 -0.017729 0.000223 -0.042119 0.400446 0.082982</pose>
+          <velocity>-0.000942 -0.014019 0.003225 -0.049682 0.005924 0.011951</velocity>
+          <acceleration>2.93634 1.83792 8.31562 2.336 -0.678114 1.66298</acceleration>
+          <wrench>0.166047 0.103933 0.47024 0 -0 0</wrench>
+        </link>
+        <link name='miro_head::eyelid_lh'>
+          <pose>-0.430137 0.067661 -0.021367 0.288402 0.19947 0.029843</pose>
+          <velocity>-0.00135 -0.013843 -0.001482 -0.047068 0.002772 0.012066</velocity>
+          <acceleration>-0.548721 -1.61554 -0.193954 0.769684 -0.99485 1.87955</acceleration>
+          <wrench>-0.009194 -0.027068 -0.00325 0 -0 0</wrench>
+        </link>
+        <link name='miro_head::eyelid_rh'>
+          <pose>-0.409935 -0.097995 -0.022776 -0.406443 0.07234 -0.139253</pose>
+          <velocity>-0.000904 -0.013509 0.006786 -0.046406 0.009121 0.01188</velocity>
+          <acceleration>2.1711 -1.78115 6.77625 2.2142 -0.546573 1.48866</acceleration>
+          <wrench>0.036377 -0.029843 0.113536 0 -0 0</wrench>
+        </link>
+        <link name='miro_head::head'>
+          <pose>-0.492814 0.004119 0.007434 -2.9e-05 0.472603 -0.050343</pose>
+          <velocity>-0.001133 -0.013905 0.002214 -0.049584 0.005752 0.01202</velocity>
+          <acceleration>0.669512 -5.18505 3.23953 3.00855 -0.306762 1.49956</acceleration>
+          <wrench>0.175278 -1.35744 0.848106 0 -0 0</wrench>
+        </link>
+        <link name='miro_neck::neck'>
+          <pose>-0.493488 0.004161 0.007776 7e-06 0.476379 -0.050364</pose>
+          <velocity>0.002185 0.003921 0.001234 0.027619 -0.009186 -0.050232</velocity>
+          <acceleration>2.19453 -5.02962 2.66561 0.764119 1.35607 -1.95513</acceleration>
+          <wrench>0.165463 -0.379224 0.200982 0 -0 0</wrench>
+        </link>
+        <link name='miro_tail::tail'>
+          <pose>-0.447588 0.001587 7.6e-05 0.000217 -0.106301 -0.052184</pose>
+          <velocity>-0.001691 0.00213 0.001398 0.063769 0.03695 -0.0174</velocity>
+          <acceleration>2.19778 -3.70968 15.3185 -2.15844 1.24738 -0.493132</acceleration>
+          <wrench>0.124282 -0.209779 0.866246 0 -0 0</wrench>
+        </link>
+        <link name='miro_tail::tail_gmbl'>
+          <pose>-0.447574 0.001846 7.5e-05 2.3e-05 -0.1063 -0.050354</pose>
+          <velocity>-0.001679 0.002151 0.001437 0.064029 0.036804 -0.017398</velocity>
+          <acceleration>2.19366 -3.69855 15.3253 -1.61953 1.44466 -0.532321</acceleration>
+          <wrench>0.124049 -0.20915 0.866629 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='miro_arena'>
+        <pose>0 0 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='main'>
+          <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <light name='sun'>
+        <pose>0 0 10 0 -0 0</pose>
+      </light>
+    </state>
   </world>
 </sdf>
