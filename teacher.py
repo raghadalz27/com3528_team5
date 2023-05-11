@@ -251,6 +251,7 @@ if __name__ == "__main__":
 
     rospy.init_node("teacher", anonymous=True)
     main = Teacher()
+    main.loop()
     # message1 = UInt16MultiArray()
     # message1.data = [1000,255,1]
 
