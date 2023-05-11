@@ -202,12 +202,12 @@ class Teacher():
         return [max_circle[0], max_circle[1], max_circle[2]]
     
     def detectBlue(self):
-        if (detect_cylinder(colour=0)!= NULL):
+        if (self.detect_cylinder(colour=0)!= NULL):
             return True
         else:
             return False
     def detectGreen(self):
-        if (detect_cylinder(colour=2)!= NULL):
+        if (self.detect_cylinder(colour=2)!= NULL):
             return True
         else:
             return False
