@@ -126,9 +126,10 @@ class MiRoClient:
         # List of action functions
         ##NOTE Try writing your own action functions and adding them here
         self.actions = [
-            # self.goAfterBlue,
-            # self.goAfterGreen,
-            self.fakeJob,
+            self.goAfterBlue,
+            self.goAfterGreen,
+            # self.fakeJob,
+            # self.fakeJob2,
         ]
 
         # Initialise objects for data storage and publishing
@@ -246,6 +247,15 @@ class MiRoClient:
     
     def fakeJob(self, t0):
         print("faking job")
+        self.counter = 0
+        # This switch loops through MiRo behaviours:
+        # Find cylinder, lock on to the cylinder and kick cylinder
+        while rospy.Time.now() < t0 + self.ACTION_DURATION:
+            self.counter += 1
+            rospy.sleep(self.TICK)
+
+    def fakeJob2(self, t0):
+        print("faking job: the sequel")
         self.counter = 0
         # This switch loops through MiRo behaviours:
         # Find cylinder, lock on to the cylinder and kick cylinder
@@ -393,7 +403,7 @@ class MiRoClient:
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -558,6 +568,8 @@ class MiRoClient:
                 self.instruction = self.SIGNAL - 1
                 self.reward = 0
                 self.punishment = 0
+                print("Instruction:")
+                print(self.instruction)
                 # Select next action randomly or via Q score with equal probability
                 if np.random.random() >= 0.5:
                     print("Performing random action")
@@ -576,7 +588,7 @@ class MiRoClient:
                 #start_of_break = rospy.Time.now()
                 print("Waiting for Results")
                 #while rospy.Time.now() < start_of_break + self.ACTION_DURATION :
-                while self.SIGNAL != 3 or self.SIGNAL != 4 :
+                while self.SIGNAL != 3 and self.SIGNAL != 4 :
                     rospy.sleep(self.TICK)
 
                 #reward_strength = self.reward + self.punishment
@@ -600,6 +612,7 @@ class MiRoClient:
                 print("Starting Break")
                 while rospy.Time.now() < start_of_break + rospy.Duration(5.0):
                     rospy.sleep(self.TICK)
+                print("Waiting for next instruction")
             
             
 
