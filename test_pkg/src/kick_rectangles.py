@@ -21,7 +21,7 @@ except ImportError:
 class MiRoClient:
     TICK = 0.02  # This is the update interval for the main control loop in secs
     CAM_FREQ = 1  # Number of ticks before camera gets a new frame, increase in case of network lag
-    SLOW = 0.1  # Radial speed when turning on the spot (rad/s)
+    SLOW = 0.05  # Radial speed when turning on the spot (rad/s)
     FAST = 0.8  # Linear speed when kicking the cylinder (m/s)
     DEBUG = True  # Set to True to enable debug views of the cameras
     COLOUR = 0 # 0 = BLUE, 1 = RED, 2 = GREEN
@@ -82,6 +82,7 @@ class MiRoClient:
             # Crop image
             #image = image[80:280, 150:300]
             # Convert from OpenCV's default BGR to RGB
+            image = image[170:360,1:640]
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # Store image as class attribute for further use
             self.input_camera[index] = image
@@ -118,11 +119,11 @@ class MiRoClient:
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if self.COLOUR == 0:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 100, 100]), np.array([target_hue + 20, 255, 255])]
         elif self.COLOUR == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range
         ##NOTE Both masks are currently blue
@@ -171,8 +172,10 @@ class MiRoClient:
             # if bbox is None:
             #     print("bbox is none")    
             x,y,w,h = bbox
-            # if w < 10 or h < 10 or w*h < 1500 or w > 1000:
-            #     continue
+
+            # Minimum rect limit
+            if(w < self.frame_width*0.02 or h < self.frame_height*0.05):
+                continue
 
             ## Draw rect
             cv2.rectangle(dst, (x,y), (x+w,y+h), (255,0,0), 1, 16)                           

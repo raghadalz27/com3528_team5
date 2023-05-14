@@ -51,8 +51,8 @@ class MiRoClient:
     VERBOSE = True  # Whether to print out values of Q and N after each iteration
     ##NOTE The following option is relevant in MiRoCODE
     NODE_EXISTS = False  # Disables (True) / Enables (False) rospy.init_node
-    CAM_FREQ = 1
-    SLOW = 0.1
+    CAM_FREQ = 2
+    SLOW = 0.05
     FAST = 0.8
     DEBUG = True
     SIGNAL = 0
@@ -168,10 +168,10 @@ class MiRoClient:
         
         self.alpha = 0.7  # learning rate
         self.discount = 25  # discount factor (anti-damping)
-        self.reset_head_pose()
 
         # Give it a sec to make sure everything is initialised
-        rospy.sleep(1.0)
+        rospy.sleep(5.0)
+        self.reset_head_pose()
 
     def callback_mics(self, data):
         
@@ -204,17 +204,21 @@ class MiRoClient:
         amplitude_three=np.abs(fft_buffer[index_three])
         amplitude_four=np.abs(fft_buffer[index_four])
 
-        threshold = 2000000
+        threshold = 1000000
         if amplitude_one > threshold:
+            #print("signal 1")
             self.SIGNAL = 1
 
         if amplitude_two > threshold:
+            #print("signal 2")
             self.SIGNAL = 2
 
         if amplitude_three > threshold:
+            #print("signal 3")
             self.SIGNAL = 3
 
         if amplitude_four > threshold:
+            #print("signal 4")
             self.SIGNAL = 4
 
     def goAfterBlue(self, t0):
@@ -318,14 +322,14 @@ class MiRoClient:
         """
         self.kin_joints = JointState()  # Prepare the empty message
         self.kin_joints.name = ["tilt", "lift", "yaw", "pitch"]
-        self.kin_joints.position = [0.0, radians(35.0), 0.0, 0.0]
+        self.kin_joints.position = [0.0, radians(25.0), 0.0, 0.0]
         t = 0
         while not rospy.core.is_shutdown():  # Check ROS is running
             # Publish state to neck servos for 1 sec
             self.pub_kin.publish(self.kin_joints)
             rospy.sleep(self.TICK)
             t += self.TICK
-            if t > 1:
+            if t > 3:
                 break
 
     def drive(self, speed_l=0.1, speed_r=0.1):  # (m/sec, m/sec)
@@ -365,6 +369,7 @@ class MiRoClient:
             # Convert from OpenCV's default BGR to RGB
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # Store image as class attribute for further use
+            image = image[170:360,1:640]
             self.input_camera[index] = image
             # Get image dimensions
             self.frame_height, self.frame_width, channels = image.shape
@@ -399,7 +404,7 @@ class MiRoClient:
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if colour == 0:
-            hsv_boundries = [np.array([target_hue - 20, 150, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 100, 10]), np.array([target_hue + 20, 255, 255])]
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
@@ -428,12 +433,16 @@ class MiRoClient:
         # Get the largest rectangle
         max_rectangle = None
         self.w = 0
-        self.h = 0                
+        self.h = 0               
         dst = frame.copy()
         for cnt in contours:
             ## Get the straight bounding rect            
             bbox = cv2.boundingRect(cnt)                 
             x,y,w,h = bbox            
+            
+            # Minimum rect limit
+            if(w < self.frame_width*0.02 or h < self.frame_height*0.05):
+                continue
 
             ## Draw rect
             cv2.rectangle(dst, (x,y), (x+w,y+h), (255,0,0), 1, 16)                           
@@ -515,11 +524,11 @@ class MiRoClient:
             self.drive(-self.SLOW, self.SLOW)
         # Make the MiRo face the cylinder if it's visible with both cameras
         elif self.cylinder[0] and self.cylinder[1]:
-            error = 0.05  # 5% of image width
+            error = 0.08  # 5% of image width
             # Use the normalised values
             left_x = self.cylinder[0][0]  # should be in range [0.0, 0.5]
             right_x = self.cylinder[1][0]  # should be in range [-0.5, 0.0]
-            rotation_speed = 0.03  # Turn even slower now
+            rotation_speed = 0.01  # Turn even slower now
             if abs(left_x) - abs(right_x) > error:
                 self.drive(rotation_speed, -rotation_speed)  # turn clockwise
             elif abs(left_x) - abs(right_x) < -error:
@@ -531,7 +540,7 @@ class MiRoClient:
                 self.bookmark = self.counter
         # Otherwise, the cylinder is lost :-(
         else:
-            self.status_code = 0  # Go back to square 1...
+            self.status_code = 1  # Go back to square 1...
             print("MiRo has lost the cylinder...")
             self.just_switched = True
 
@@ -544,7 +553,7 @@ class MiRoClient:
         if self.just_switched:
             print("MiRo is kicking the cylinder!")
             self.just_switched = False
-        if self.counter <= self.bookmark + 2 / self.TICK:
+        if self.counter <= self.bookmark + 3 / self.TICK:
             self.drive(self.FAST, self.FAST)
         else:
             self.status_code = 0  # Back to the default state after the kick
@@ -555,6 +564,7 @@ class MiRoClient:
         Main loop
         """
         print("Starting the loop")
+        self.jobs_done_counter = 0
         while not rospy.core.is_shutdown():
             if(self.SIGNAL == 1 or self.SIGNAL == 2):
                 self.instruction = self.SIGNAL - 1
@@ -563,15 +573,16 @@ class MiRoClient:
                 print("Instruction:")
                 print(self.instruction)
                 # Select next action randomly or via Q score with equal probability
-                if np.random.random() >= 0.5:
-                    print("Performing random action")
-                    self.r = np.random.randint(0, len(self.actions))
-                else:
-                    print("Performing action with the highest Q score")
-                    self.r = np.argmax(self.Q[self.instruction])
+                # if np.random.random() >= 0.5 or self.jobs_done_counter<3:
+                #     print("Performing random action")
+                #     self.r = np.random.randint(0, len(self.actions))
+                # else:
+                print("Performing action with the highest Q score")
+                self.r = np.argmax(self.Q[self.instruction])
 
                 # Run the selected action and update the action counter N accordingly
                 start_time = rospy.Time.now()
+                print(self.r)
                 self.N[self.instruction][self.r] += 1
                 self.actions[self.r](start_time)
                 if self.VERBOSE:
@@ -600,10 +611,7 @@ class MiRoClient:
                     print("N values are: {}".format(self.N))
                     print("----------------------------------------")
                 self.SIGNAL = 0
-                start_of_break = rospy.Time.now()
-                print("Starting Break")
-                while rospy.Time.now() < start_of_break + rospy.Duration(5.0):
-                    rospy.sleep(self.TICK)
+                self.reset_head_pose()
                 print("Waiting for next instruction")
             
             
