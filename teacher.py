@@ -233,8 +233,9 @@ class Teacher():
             self.instruction = np.random.randint(0, 2)
             print("Instruction: " + str(self.instruction))
             #say instruction until cylinder is moved
-            self.frameMissingCount = 0
-            while self.frameMissingCount<10:
+            self.frameMissingCountGreen = 0
+            self.frameMissingCountBlue = 0
+            while self.frameMissingCountGreen<10 and self.frameMissingCountBlue<10:
                 if not self.new_frame[0]:
                     rospy.sleep(self.TICK)
                     continue
@@ -242,17 +243,21 @@ class Teacher():
                 self.greenSeen = self.look_for_cylinder(2)
                 rospy.sleep(self.TICK)
                 self.blueSeen = self.look_for_cylinder(0)
-                print(self.blueSeen)
-                if not (self.greenSeen and self.blueSeen) :
-                    self.frameMissingCount = self.frameMissingCount + 1
+                #print(self.blueSeen)
+                if not (self.greenSeen) :
+                    self.frameMissingCountGreen = self.frameMissingCountGreen + 1
                 else:
-                    self.frameMissingCount = 0
+                    self.frameMissingCountGreen = 0
+                if not (self.blueSeen) :
+                    self.frameMissingCountBlue = self.frameMissingCountBlue + 1
+                else:
+                    self.frameMissingCountBlue = 0
                 rospy.sleep(self.TICK)
             #identify which cylinder is missing
-            if not (self.greenSeen):
+            if (self.frameMissingCountGreen<10):
                 self.missing = 1
                 print("green missing")
-            else:
+            if (self.frameMissingCountBlue<10):
                 self.missing = 2
                 print("blue missing")
             #break for student to stop
