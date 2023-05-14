@@ -130,7 +130,7 @@ class Teacher():
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if colour == 0:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 70, 150]), np.array([target_hue + 20, 255, 255])]
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
@@ -239,7 +239,7 @@ class Teacher():
                 if not self.new_frame[0]:
                     rospy.sleep(self.TICK)
                     continue
-                #self.beep_pub.publish(self.messages[self.instruction])
+                self.beep_pub.publish(self.messages[self.instruction])
                 self.greenSeen = self.look_for_cylinder(2)
                 rospy.sleep(self.TICK)
                 self.blueSeen = self.look_for_cylinder(0)
@@ -255,15 +255,15 @@ class Teacher():
                 rospy.sleep(self.TICK)
             #identify which cylinder is missing
             if (self.frameMissingCountGreen>=10):
-                self.missing = 1
+                self.missing = 0
                 print("green missing")
             if (self.frameMissingCountBlue>=10):
-                self.missing = 2
+                self.missing = 1
                 print("blue missing")
             #break for student to stop
             start_of_break = rospy.Time.now()
             print("Starting Break")
-            while rospy.Time.now() < start_of_break + rospy.Duration(5.0):
+            while rospy.Time.now() < start_of_break + rospy.Duration(10.0):
                 rospy.sleep(self.TICK)
             #decide whether to reward or punish (results)
             if(self.instruction == self.missing):
@@ -276,7 +276,7 @@ class Teacher():
             start_of_results = rospy.Time.now()
             print("Starting results")
             while rospy.Time.now() < start_of_results + rospy.Duration(5.0):
-                #self.beep_pub.publish(self.resultMessage)
+                self.beep_pub.publish(self.resultMessage)
                 rospy.sleep(self.TICK)
                 
             self.instruction = 0
