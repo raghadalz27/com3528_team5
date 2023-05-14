@@ -191,7 +191,7 @@ class MiRoClient:
             #     print("rectangle is none")                  
         # This shouldn't happen, but you never know...
         if max_rectangle is None:  
-            print("max rectangle is none")          
+            #print("max rectangle is none")          
             return    
 
         # Append detected rectangle        
@@ -274,7 +274,7 @@ class MiRoClient:
             left_x = self.cylinder[0][0]  # should be in range [0.0, 0.5]
             right_x = self.cylinder[1][0] # should be in range [-0.5, 0.0]
             rotation_speed = 0.03  # Turn even slower now
-            print(f"left_x={left_x}, right_x={right_x}")
+            #print(f"left_x={left_x}, right_x={right_x}")
             if abs(left_x) - abs(right_x) > error:
                 #print(f"Turning Right: {abs(left_x) - abs(right_x)}")
                 self.drive(rotation_speed, -rotation_speed)  # turn clockwise               
@@ -283,7 +283,7 @@ class MiRoClient:
                 self.drive(-rotation_speed, rotation_speed)  # turn counterclockwise
             else:
                 # Successfully turned to face the cylinder
-                print("found it")
+                #print("found it")
                 self.status_code = 3  # Switch to the third action
                 self.just_switched = True
                 self.bookmark = self.counter
