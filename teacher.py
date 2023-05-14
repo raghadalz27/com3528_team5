@@ -130,11 +130,11 @@ class Teacher():
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if colour == 0:
-            hsv_boundries = [np.array([target_hue - 20, 150, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
-            hsv_boundries = [np.array([target_hue - 20, 230, 230]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range        
         mask = cv2.inRange(im_hsv, hsv_boundries[0], hsv_boundries[1])
@@ -204,8 +204,8 @@ class Teacher():
     def look_for_cylinder(self, colour):
             for index in range(2):  # For each camera (0 = left, 1 = right)
                 # Skip if there's no new image, in case the network is choking
-                if not self.new_frame[index]:
-                    continue
+                # if not self.new_frame[index]:
+                #     continue
                 image = self.input_camera[index]
                 # Run the detect cylinder procedure
                 self.cylinder[index] = self.detect_cylinder(image, index, colour)            
@@ -254,10 +254,10 @@ class Teacher():
                     self.frameMissingCountBlue = 0
                 rospy.sleep(self.TICK)
             #identify which cylinder is missing
-            if (self.frameMissingCountGreen<10):
+            if (self.frameMissingCountGreen>=10):
                 self.missing = 1
                 print("green missing")
-            if (self.frameMissingCountBlue<10):
+            if (self.frameMissingCountBlue>=10):
                 self.missing = 2
                 print("blue missing")
             #break for student to stop

@@ -399,14 +399,13 @@ class MiRoClient:
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
         if colour == 0:
-            hsv_boundries = [np.array([target_hue - 20, 70, 70]), np.array([target_hue + 20, 255, 255])]
+            hsv_boundries = [np.array([target_hue - 20, 150, 70]), np.array([target_hue + 20, 255, 255])]
         elif colour == 1:
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
         else:
             hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
-        # Generate the mask based on the desired hue range
-        ##NOTE Both masks are currently blue
+        # Generate the mask based on the desired hue range        
         mask = cv2.inRange(im_hsv, hsv_boundries[0], hsv_boundries[1])
         mask_on_image = cv2.bitwise_and(im_hsv, im_hsv, mask=mask)
 
@@ -416,66 +415,59 @@ class MiRoClient:
             cv2.waitKey(1)
 
         # Clean up the image
-        seg = mask # Currently only looks for blue
+        seg = mask 
         seg = cv2.GaussianBlur(seg, (5, 5), 0)
         seg = cv2.erode(seg, None, iterations=2)
-        seg = cv2.dilate(seg, None, iterations=2)
-
-        # Fine-tune parameters
-        cylinder_detect_min_dist_between_cens = 40  # Empirical
-        canny_high_thresh = 10  # Empirical
-        cylinder_detect_sensitivity = 10  # Lower detects more circles, so it's a trade-off
-        cylinder_detect_min_radius = 5  # Arbitrary, empirical
-        cylinder_detect_max_radius = 50  # Arbitrary, empirical
+        seg = cv2.dilate(seg, None, iterations=2)        
          
-        ##NOTE Need to change to find cylinder boundaries using hough line transform
-        # Find circles using OpenCV routine
-        # This function returns a list of circles, with their x, y and r values
-        circles = cv2.HoughCircles(
-            seg,
-            cv2.HOUGH_GRADIENT,
-            1,
-            cylinder_detect_min_dist_between_cens,
-            param1=canny_high_thresh,
-            param2=cylinder_detect_sensitivity,
-            minRadius=cylinder_detect_min_radius,
-            maxRadius=cylinder_detect_max_radius,
-        )
+        contours, hierarchy = cv2.findContours(seg, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)                
 
-        if circles is None:
-            # If no circles were found, just display the original image
+        if not contours:           
             return
 
-        # Get the largest circle
-        max_circle = None
-        self.max_rad = 0
-        circles = np.uint16(np.around(circles))
-        for c in circles[0, :]:
-            if c[2] > self.max_rad:
-                self.max_rad = c[2]
-                max_circle = c
+        # Get the largest rectangle
+        max_rectangle = None
+        self.w = 0
+        self.h = 0                
+        dst = frame.copy()
+        for cnt in contours:
+            ## Get the straight bounding rect            
+            bbox = cv2.boundingRect(cnt)                 
+            x,y,w,h = bbox            
+
+            ## Draw rect
+            cv2.rectangle(dst, (x,y), (x+w,y+h), (255,0,0), 1, 16)                           
+
+            ## Get the rotated rect
+            rbox = cv2.minAreaRect(cnt)
+
+            if  w*h >= self.w*self.h:
+                self.w = w
+                self.h = h
+                max_rectangle = rbox 
+                                 
         # This shouldn't happen, but you never know...
-        if max_circle is None:
-            return
+        if max_rectangle is None:                        
+            return    
 
-        # Append detected circle and its centre to the frame
-        cv2.circle(frame, (max_circle[0], max_circle[1]), max_circle[2], (0, 255, 0), 2)
-        cv2.circle(frame, (max_circle[0], max_circle[1]), 2, (0, 0, 255), 3)
+        # Append detected rectangle        
+        box = cv2.boxPoints(max_rectangle)
+        box = np.int0(box)
+        cv2.drawContours(frame,[box],0,(0,0,255),2)        
         if self.DEBUG:
-            cv2.imshow("circles" + str(index), frame)
+            cv2.imshow("rectangles" + str(index), frame)
             cv2.waitKey(1)
 
-        # Normalise values to: x,y = [-0.5, 0.5], r = [0, 1]
-        max_circle = np.array(max_circle).astype("float32")
-        max_circle[0] -= self.x_centre
-        max_circle[0] /= self.frame_width
-        max_circle[1] -= self.y_centre
-        max_circle[1] /= self.frame_width
-        max_circle[1] *= -1.0
-        max_circle[2] /= self.frame_width
+        # Normalise values to: x,y = [-0.5, 0.5], r = [0, 1]           
+        target_rectangle = np.array(max_rectangle[0]).astype("float32")        
+        target_rectangle[0] -= self.x_centre
+        target_rectangle[0] /= self.frame_width
+        target_rectangle[1] -= self.y_centre
+        target_rectangle[1] /= self.frame_width
+        target_rectangle[1] *= -1.0       
 
-        # Return a list values [x, y, r] for the largest circle
-        return [max_circle[0], max_circle[1], max_circle[2]]
+        # Return a list values [cx, cy, w, h] for the largest rectangle        
+        return [target_rectangle[0], target_rectangle[1]]
 
     def look_for_cylinder(self, colour):
         """
