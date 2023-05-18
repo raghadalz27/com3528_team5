@@ -214,18 +214,7 @@ class Teacher():
                 return False
             else:
                 return True
-    
-#     def detectBlue(self):
-#         if (self.detect_cylinder(colour=0)!= NULL):
-#             return True
-#         else:
-#             return False
-#     def detectGreen(self):
-#         if (self.detect_cylinder(colour=2)!= NULL):
-#             return True
-#         else:
-#             return False
-    
+        
     def loop(self):
         print("Starting the loop")
         while not rospy.core.is_shutdown():
@@ -245,13 +234,13 @@ class Teacher():
                 self.blueSeen = self.look_for_cylinder(0)
                 #print(self.blueSeen)
                 if not (self.greenSeen) :
-                    self.frameMissingCountGreen = self.frameMissingCountGreen + 1
+                    self.frameMissingCountGreen = self.frameMissingCountGreen + 1 #increment frame
                 else:
-                    self.frameMissingCountGreen = 0
+                    self.frameMissingCountGreen = 0 #reset frame count
                 if not (self.blueSeen) :
-                    self.frameMissingCountBlue = self.frameMissingCountBlue + 1
+                    self.frameMissingCountBlue = self.frameMissingCountBlue + 1 #increment frame
                 else:
-                    self.frameMissingCountBlue = 0
+                    self.frameMissingCountBlue = 0 #reset frame count
                 rospy.sleep(self.TICK)
             #identify which cylinder is missing
             if (self.frameMissingCountGreen>=10):
