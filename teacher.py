@@ -16,9 +16,6 @@ class Teacher():
         topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
 
         # subscribers
-        self.sub_mics = rospy.Subscriber(topic_base_name + "/sensors/mics",
-            Int16MultiArray, self.callback_mics, queue_size=1, tcp_nodelay=True)
-
         self.sub_caml = rospy.Subscriber(
             topic_base_name + "/sensors/caml/compressed",
             CompressedImage,
@@ -34,7 +31,7 @@ class Teacher():
             tcp_nodelay=True,
         )
        
-        # publishers
+        # create publisher to tone topic to produce audio signals
         self.beep_pub = rospy.Publisher(topic_base_name + "/control/tone",
             UInt16MultiArray, queue_size=1, tcp_nodelay=True)
 
@@ -58,6 +55,8 @@ class Teacher():
         self.missing = 0
         self.resultMessage = 0
         self.SIGNALTIME = 2
+        
+        # create signal messages for each signal
         message1 = UInt16MultiArray()
         message1.data = [1000,255,self.SIGNALTIME]
         message2 = UInt16MultiArray()
@@ -67,6 +66,7 @@ class Teacher():
         message4 = UInt16MultiArray()
         message4.data = [2000,255,self.SIGNALTIME]
         self.messages = [message1,message2,message3,message4]
+        
         self.greenSeen = True
         self.blueSeen = True
         self.frameMissingCount = 0
