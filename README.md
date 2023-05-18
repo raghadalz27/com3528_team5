@@ -2,7 +2,8 @@
 
 ## Environment
 
-Need the mdk installed  
+MiRo MDK must be installed.  
+
 Needs the following python libraries installed:  
 - numpy
 - cv2
