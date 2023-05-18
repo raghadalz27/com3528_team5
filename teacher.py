@@ -122,18 +122,18 @@ class Teacher():
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         # RGB values of target cylinder
-        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # e.g. Blue (Note: BGR)
+        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # Blue, Red, Green (Note: BGR)
         # Convert RGB values to HSV colour model
         hsv_cylinder = cv2.cvtColor(rgb_cylinder[colour], cv2.COLOR_RGB2HSV)        
 
         # Extract colour boundaries for masking image
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
-        if colour == 0:
+        if colour == 0: # Blue
             hsv_boundries = [np.array([target_hue - 20, 70, 150]), np.array([target_hue + 20, 255, 255])]
-        elif colour == 1:
+        elif colour == 1: # Red
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
-        else:
+        else: # Green
             hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range        
@@ -151,9 +151,9 @@ class Teacher():
         seg = cv2.erode(seg, None, iterations=2)
         seg = cv2.dilate(seg, None, iterations=2)        
          
+        # Get contours of the image with mask applied
         contours, hierarchy = cv2.findContours(seg, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)        
         
-
         if not contours:           
             return
 
@@ -163,14 +163,14 @@ class Teacher():
         self.h = 0                
         dst = frame.copy()
         for cnt in contours:
-            ## Get the straight bounding rect            
+            ## Get the straight bounding rectangle         
             bbox = cv2.boundingRect(cnt)                 
             x,y,w,h = bbox            
 
-            ## Draw rect
+            ## Draw rectangle
             cv2.rectangle(dst, (x,y), (x+w,y+h), (255,0,0), 1, 16)                           
 
-            ## Get the rotated rect
+            ## Get the rotated rectangle
             rbox = cv2.minAreaRect(cnt)
 
             if  w*h >= self.w*self.h:

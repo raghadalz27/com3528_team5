@@ -2,11 +2,7 @@
 """
 Simple action selection mechanism inspired by the K-bandit problem
 Initially, MiRo performs one of the following actions on random, namely: 
-wiggle ears, wag tail, rotate, turn on LEDs and simulate a Braitenberg Vehicle.
-While an action is being executed, stroking MiRo's head will reinforce it, while  
-stroking MiRo's body will inhibit it, by increasing or reducing the probability 
-of this action being picked in the future.
-NOTE: The code was tested for Python 2 and 3
+goAfterBlue and goAfterGreen.
 For Python 2 the shebang line is
 #!/usr/bin/env python
 """
@@ -123,8 +119,7 @@ class MiRoClient:
         # Move the head to default pose
         
 
-        # List of action functions
-        ##NOTE Try writing your own action functions and adding them here
+        # List of action functions        
         self.actions = [
             self.goAfterBlue,
             self.goAfterGreen,
@@ -382,7 +377,8 @@ class MiRoClient:
             pass
 
     def detect_cylinder(self, frame, index, colour):
-        if frame is None:  # Sanity check
+        # Sanity check
+        if frame is None:  
             return
 
         # Debug window to show the frame
@@ -396,18 +392,18 @@ class MiRoClient:
         im_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         # RGB values of target cylinder
-        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # e.g. Blue (Note: BGR)
+        rgb_cylinder = [np.uint8([[[255, 0, 0]]]), np.uint8([[[0, 0, 255]]]), np.uint8([[[0, 255, 0]]])]  # Blue, Red, Green (Note: BGR)
         # Convert RGB values to HSV colour model
         hsv_cylinder = cv2.cvtColor(rgb_cylinder[colour], cv2.COLOR_RGB2HSV)        
 
         # Extract colour boundaries for masking image
         # Get the hue value from the numpy array containing target colour
         target_hue = hsv_cylinder[0, 0][0]
-        if colour == 0:
+        if colour == 0: # Blue
             hsv_boundries = [np.array([target_hue - 20, 100, 10]), np.array([target_hue + 20, 255, 255])]
-        elif colour == 1:
+        elif colour == 1: # Red
             hsv_boundries = [np.array([target_hue - 0, 70, 70]), np.array([target_hue + 0, 255, 255])]
-        else:
+        else: # Green
             hsv_boundries = [np.array([target_hue - 20, 60, 60]), np.array([target_hue + 20, 255, 255])]
 
         # Generate the mask based on the desired hue range        
@@ -425,6 +421,7 @@ class MiRoClient:
         seg = cv2.erode(seg, None, iterations=2)
         seg = cv2.dilate(seg, None, iterations=2)        
          
+        # Get contours of the image with mask applied
         contours, hierarchy = cv2.findContours(seg, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)                
 
         if not contours:           
@@ -440,16 +437,17 @@ class MiRoClient:
             bbox = cv2.boundingRect(cnt)                 
             x,y,w,h = bbox            
             
-            # Minimum rect limit
+            # Minimum rectangle limit
             if(w < self.frame_width*0.02 or h < self.frame_height*0.05):
                 continue
 
-            ## Draw rect
+            ## Draw rectangle
             cv2.rectangle(dst, (x,y), (x+w,y+h), (255,0,0), 1, 16)                           
 
-            ## Get the rotated rect
+            ## Get the rotated rectangle
             rbox = cv2.minAreaRect(cnt)
 
+            # Check if new largest rectangle
             if  w*h >= self.w*self.h:
                 self.w = w
                 self.h = h
