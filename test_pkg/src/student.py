@@ -100,10 +100,11 @@ class MiRoClient:
         )
         topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
        
-        # subscribers
+        # subscribe to mics topic for audio data
         self.sub_mics = rospy.Subscriber(topic_base_name + "/sensors/mics",
             Int16MultiArray, self.callback_mics, queue_size=1, tcp_nodelay=True)
         
+        # define buffer size and buffer to store audio data, using deque datatype
         self.buffer_size = 5000
         self.buffer = deque(maxlen=self.buffer_size)
         # New frame notification
@@ -170,35 +171,38 @@ class MiRoClient:
 
     def callback_mics(self, data):
         
-        # print(np.shape(data.data))
-        # print(data.data[:500])
-
-        ## extend the buffer with left ear
+        # extend the buffer with left ear
         self.buffer.extend(data.data[:500])
-
-        #print(self.buffer[0])
-        #print(len(self.buffer))
-
+        
+        # use fft to convert buffer data from time-domain to frequency-domain
         fft_buffer = fft(self.buffer)
 
+        # define sample rate
         sample_rate = 20000
+        
+        # make an array of frequencies from 0 to the sample rate with length equal to the buffer size
         frequencies = np.linspace(0, sample_rate, len(self.buffer))
-
+        
+        # define desired frequencies to detect
         desired_frequency_one = 1000
         desired_frequency_two = 1300
         desired_frequency_three = 1600
         desired_frequency_four = 2000
-
+        
+        # Find index of frequencies
         index_one = np.abs(frequencies - desired_frequency_one).argmin()
         index_two = np.abs(frequencies - desired_frequency_two).argmin()
         index_three = np.abs(frequencies - desired_frequency_three).argmin()
         index_four = np.abs(frequencies - desired_frequency_four).argmin()
-
+        
+        # get amplitude value for each frequency
         amplitude_one=np.abs(fft_buffer[index_one])
         amplitude_two=np.abs(fft_buffer[index_two])
         amplitude_three=np.abs(fft_buffer[index_three])
         amplitude_four=np.abs(fft_buffer[index_four])
-
+        
+        # detect whether frequency passes a threshhold
+        # if it does, we have recieved the signal
         threshold = 1000000
         if amplitude_one > threshold:
             #print("signal 1")
