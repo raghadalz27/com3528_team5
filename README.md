@@ -2,8 +2,8 @@
 
 ## Environment
 
-Need the mdk installed
-Needs the following python libraries installed:
+Need the mdk installed  
+Needs the following python libraries installed:  
 - numpy
 - cv2
 
