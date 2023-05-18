@@ -124,8 +124,6 @@ class MiRoClient:
         self.actions = [
             self.goAfterBlue,
             self.goAfterGreen,
-            # self.fakeJob,
-            # self.fakeJob2,
         ]
 
         # Initialise objects for data storage and publishing
@@ -223,7 +221,6 @@ class MiRoClient:
     def goAfterBlue(self, t0):
         print("MiRo Going after blue cylinder")
         self.counter = 0
-        # This switch loops through MiRo behaviours:
         # Find cylinder, lock on to the cylinder and kick cylinder
         self.status_code = 1
         while rospy.Time.now() < t0 + self.ACTION_DURATION:
@@ -248,28 +245,10 @@ class MiRoClient:
             self.counter += 1
             rospy.sleep(self.TICK)
     
-    def fakeJob(self, t0):
-        print("faking job")
-        self.counter = 0
-        # This switch loops through MiRo behaviours:
-        # Find cylinder, lock on to the cylinder and kick cylinder
-        while rospy.Time.now() < t0 + self.ACTION_DURATION:
-            self.counter += 1
-            rospy.sleep(self.TICK)
-
-    def fakeJob2(self, t0):
-        print("faking job: the sequel")
-        self.counter = 0
-        # This switch loops through MiRo behaviours:
-        # Find cylinder, lock on to the cylinder and kick cylinder
-        while rospy.Time.now() < t0 + self.ACTION_DURATION:
-            self.counter += 1
-            rospy.sleep(self.TICK)
 
     def goAfterGreen(self, t0):
         print("MiRo Going after Green cylinder")
         self.counter = 0
-        # This switch loops through MiRo behaviours:
         # Find cylinder, lock on to the cylinder and kick cylinder
         self.status_code = 1
         while rospy.Time.now() < t0 + self.ACTION_DURATION:
@@ -293,27 +272,6 @@ class MiRoClient:
             # Yield
             self.counter += 1
             rospy.sleep(self.TICK)
-
-    def touchHeadListener(self, data):
-        """
-        Positive reinforcement comes from stroking the head
-        """
-        if data.data > 0:
-            self.reward += 1
-
-    def touchBodyListener(self, data):
-        """
-        Negative reinforcement comes from stroking the body
-        """
-        if data.data > 0:
-            self.punishment -= 1
-
-    def lightCallback(self, data):
-        """
-        Get the frontal illumination
-        """
-        if data.data:
-            self.light_array = data.data
             
     def reset_head_pose(self):
         """
@@ -568,21 +526,18 @@ class MiRoClient:
         print("Starting the loop")
         self.jobs_done_counter = 0
         while not rospy.core.is_shutdown():
+            #wait until one of the two instruction signals has been heard
             if(self.SIGNAL == 1 or self.SIGNAL == 2):
-                self.instruction = self.SIGNAL - 1
+                self.instruction = self.SIGNAL - 1 #get instruction number
+                #reset reward and punishment
                 self.reward = 0
                 self.punishment = 0
                 print("Instruction:")
                 print(self.instruction)
-                # Select next action randomly or via Q score with equal probability
-                # if np.random.random() >= 0.5 or self.jobs_done_counter<3:
-                #     print("Performing random action")
-                #     self.r = np.random.randint(0, len(self.actions))
-                # else:
                 print("Performing action with the highest Q score")
-                self.r = np.argmax(self.Q[self.instruction])
+                self.r = np.argmax(self.Q[self.instruction]) # perform action with the highest Q score (will default to the first job, so will always go after blue on first time of hearing each instruction)
 
-                # Run the selected action and update the action counter N accordingly
+                # Run the selected action and update the action counter N accordingly for this instruction
                 start_time = rospy.Time.now()
                 print(self.r)
                 self.N[self.instruction][self.r] += 1
@@ -590,28 +545,28 @@ class MiRoClient:
                 if self.VERBOSE:
                     print("Action finished, updating Q table")
 
-                #start_of_break = rospy.Time.now()
                 print("Waiting for Results")
-                #while rospy.Time.now() < start_of_break + self.ACTION_DURATION :
+                #loop to wait until student hears results
                 while self.SIGNAL != 3 and self.SIGNAL != 4 :
                     rospy.sleep(self.TICK)
-
-                #reward_strength = self.reward + self.punishment
-                if self.SIGNAL == 3:
+               
+                if self.SIGNAL == 3: #Pushed over correct cylinder
                     final_reward = 1.0
                     print("This behaviour has been reinforced!")
-                elif self.SIGNAL == 4:
+                elif self.SIGNAL == 4: # pushed over wrong cylinder
                     final_reward = -1.0
                     print("This behaviour has been inhibited!")
-                else:
+                else: #shouldn't ever reach this but just in case things somehow go wrong
                     final_reward = 0.0
-
+                    
+                #calculate Q score for knocking over that cylinder for this instruction
                 gamma = min(self.N[self.instruction][self.r], self.discount)
                 self.Q[self.instruction][self.r] += self.alpha * (final_reward - self.Q[self.instruction][self.r]) / gamma
                 if self.VERBOSE:
                     print("Q scores are: {}".format(self.Q))
                     print("N values are: {}".format(self.N))
                     print("----------------------------------------")
+                #reset for next instruction
                 self.SIGNAL = 0
                 self.reset_head_pose()
                 print("Waiting for next instruction")
